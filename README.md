@@ -1,9 +1,9 @@
-for frontend
-cd frontend/chatbot
-npm install 
-npm run dev
-
-for backend
-cd backend
-npm install
-node index.js
+for frontend <br>
+cd frontend/chatbot <br>
+npm install <br>
+npm run dev <br>
+<br>
+for backend <br>
+cd backend <br>
+npm install <br>
+node index.js <br>
