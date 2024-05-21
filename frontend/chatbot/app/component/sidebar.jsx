@@ -1,24 +1,34 @@
 "use client";
-import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
-import { useSearchParams } from "next/navigation";
 import socket from "../utils/socket";
 
-// Define the SideBar functional component
 const SideBar = () => {
-  const searchParams = useSearchParams();
   const [users, setUsers] = useState([]);
-  const [room, setRoom] = useState(searchParams?.get("room") ?? "");
-  const [userName, setUserName] = useState(searchParams?.get("userName") ?? "");
+  const [room, setRoom] = useState("");
+  const [username, setUserName] = useState("");
   useEffect(() => {
-    socket.on("roomUsers", ({ room, users }) => {
+    // Access URL parameters only on the client side
+    const params = new URLSearchParams(window.location.search);
+    setRoom(params?.get("room") ?? "");
+    setUserName(params?.get("username") ?? "");
+
+    // Define the event handler
+    const handleRoomUsers = ({ room, users }) => {
       setRoom(room);
       setUsers(users);
-    });
-  }, [socket]);
+    };
+
+    // Register the event listener
+    socket.on("roomUsers", handleRoomUsers);
+
+    // Clean up the effect by removing the event listener
+    return () => {
+      socket.off("roomUsers", handleRoomUsers);
+    };
+  }, []);
 
   return (
     <div
@@ -31,7 +41,7 @@ const SideBar = () => {
         </div>
         <div className="p-2 mb-2 min-w-full">
           <span className="font-light text-center p-2 mb-1"> Username: </span>
-          <span className="font-bold text-center">{userName}</span>
+          <span className="font-bold text-center">{username}</span>
           <div className="border-b-[1px]"></div>
         </div>
         <div className="p-2 mb-2">

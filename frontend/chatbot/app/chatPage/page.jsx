@@ -1,31 +1,44 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import socket from "../utils/socket";
-function ChatPage() {
-  const searchParams = useSearchParams();
-  const username = searchParams.get("userName");
-  const room = searchParams.get("room");
+
+function ClientChatPage() {
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [room, setRoom] = useState("");
 
   useEffect(() => {
-    socket.emit("joinRoom", { username, room });
+    const params = new URLSearchParams(window.location.search);
+    setUsername(params.get("username") ?? "");
+    setRoom(params.get("room") ?? "");
   }, []);
 
   useEffect(() => {
-    socket.on("message", (message) => {
-      console.log("in useeffect", message);
+    if (username && room) {
+      console.log("in useeffect room is ", room, " username ", username);
+      socket.emit("joinRoom", { username, room });
+    }
+  }, [username, room]);
+
+  useEffect(() => {
+    const handleMessage = (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
-    });
-  }, [socket]);
+    };
+
+    socket.on("message", handleMessage);
+
+    return () => {
+      socket.off("message", handleMessage);
+    };
+  }, []);
 
   const SendMessageChangeHandler = () => {
     if (currentMessage === "") return;
     socket.emit("chatMessage", currentMessage);
     setCurrentMessage("");
   };
-  console.log("messages in chatpage homepage", messages);
+
   return (
     <div className="w-full flex flex-col h-screen justify-between">
       <div className="flex flex-col gap-2 overflow-y-auto">
@@ -33,23 +46,20 @@ function ChatPage() {
           <h1 className="font-bold text-lg">All Messages</h1>
         </div>
 
-        {messages.map((currentMessage, index) => {
-          console.log("currentMessage:", currentMessage);
-          return (
-            <div
-              className="p-2 mb-2 flex flex-col justify-start items-start gap-1"
-              key={index}
-            >
-              <div className="flex flex-row gap-2 justify-start items-center">
-                <span className="font-bold text-[15px]">
-                  {currentMessage.username}
-                </span>
-                <span className="font-bold text-sm">{currentMessage.time}</span>
-              </div>
-              <p className="font-light text-sm">{currentMessage.text}</p>
+        {messages.map((currentMessage, index) => (
+          <div
+            className="flex flex-col justify-start items-start gap-1"
+            key={index}
+          >
+            <div className="flex flex-row gap-1 justify-start items-center">
+              <span className="font-bold text-[15px]">
+                {currentMessage.username}
+              </span>
+              <span className="font-bold text-sm">{currentMessage.time}</span>
             </div>
-          );
-        })}
+            <p className="font-light text-sm">{currentMessage.text}</p>
+          </div>
+        ))}
       </div>
 
       <div className="flex flex-row justify-between items-center p-4 border-t-[2px] min-w-full">
@@ -72,4 +82,4 @@ function ChatPage() {
   );
 }
 
-export default ChatPage;
+export default ClientChatPage;

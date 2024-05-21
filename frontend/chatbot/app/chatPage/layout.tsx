@@ -5,7 +5,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-full grid grid-cols-12 min-w-full">
       <div className="col-span-2 flex-none">
-        <SideBar  />
+        <SideBar />
       </div>
       <div className="col-span-10 min-w-full min-h-screen">
         <Suspense>
