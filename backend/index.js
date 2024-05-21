@@ -26,9 +26,11 @@ app.use(
 const PORT = process.env.PORT || 3001;
 
 io.on("connection", (socket) => {
+  console.log("connection on");
   socket.on("joinRoom", ({ username, room }) => {
     socket.join(room);
     const user = addUser({ id: socket.id, username, room });
+    console.log("joine room called user is", user);
     // Welcome current user
     socket.emit(
       "message",
@@ -53,11 +55,13 @@ io.on("connection", (socket) => {
   // Listen for chatMessages
   socket.on("chatMessage", (message) => {
     const user = getCurrentUser(socket.id);
+    console.log("in chatmessage event recieved");
     io.to(user.room).emit("message", formatMessage(user.username, message));
   });
 
   // Runs when client disconnects
   socket.on("disconnect", () => {
+    console.log("in disconnect ");
     const user = userLeave(socket.id);
     if (user) {
       io.to(user.room).emit(
