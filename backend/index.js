@@ -29,8 +29,6 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ username, room }) => {
     socket.join(room);
     const user = addUser({ id: socket.id, username, room });
-    console.log(" in joinroom ", user);
-
     // Welcome current user
     socket.emit(
       "message",
@@ -55,7 +53,6 @@ io.on("connection", (socket) => {
   // Listen for chatMessages
   socket.on("chatMessage", (message) => {
     const user = getCurrentUser(socket.id);
-    console.log("in chatmessage message", message, user);
     io.to(user.room).emit("message", formatMessage(user.username, message));
   });
 
